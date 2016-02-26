@@ -15,10 +15,10 @@ Nix package for Vulkan at the moment, so you'll have to do a couple of really
 horrible things to get this to build. These are the steps on my Linux machine
 (having installed the LunarG SDK and vulkan driver)
 
-`nix-shell`
-`cabal configure --extra-lib-dirs=/usr/lib/x86_64-linux-gnu`
-`cabal build`
-`LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu ./dist/build/vulkan-example/vulkan-example`
+    nix-shell
+    cabal configure --extra-lib-dirs=/usr/lib/x86_64-linux-gnu
+    cabal build
+    LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu ./dist/build/vulkan-example/vulkan-example
 
 The `vulkan` package currently takes ages and ages to build without -O0, so you
 might want to specify that too.
