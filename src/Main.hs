@@ -27,7 +27,7 @@ createInstance =
                         , vkApplicationVersion = 1
                         , vkPEngineName = namePtr
                         , vkEngineVersion = 0
-                        , vkApiVersion = Graphics.Vulkan.Version.vkApiVersion
+                        , vkApiVersion = vkMakeVersion 1 0 3
                         }
   (\appInfo -> 
   with VkInstanceCreateInfo{ vkSType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
@@ -42,7 +42,7 @@ createInstance =
   (\instInfo -> 
   alloca
   (\instPtr -> do
-  VkResult err <- vkCreateInstance instInfo nullPtr instPtr
+  err <- vkCreateInstance instInfo nullPtr instPtr
   print err
   peek instPtr 
   )))) 
