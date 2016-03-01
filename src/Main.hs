@@ -4,6 +4,7 @@
 module Main where
 
 import Graphics.Vulkan
+import Graphics.Vulkan.Version
 import Foreign.Storable
 import Foreign.Ptr
 import Foreign.Marshal.Alloc
@@ -11,8 +12,6 @@ import Foreign.Marshal.Array
 import Foreign.Marshal.Utils
 import Foreign.C.String
 import Data.Bits
-
-pattern VK_API_VERSION = 4194307
 
 main :: IO ()
 main = do
@@ -28,7 +27,7 @@ createInstance =
                         , vkApplicationVersion = 1
                         , vkPEngineName = namePtr
                         , vkEngineVersion = 0
-                        , vkApiVersion = VK_API_VERSION
+                        , vkApiVersion = Graphics.Vulkan.Version.vkApiVersion
                         }
   (\appInfo -> 
   with VkInstanceCreateInfo{ vkSType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
