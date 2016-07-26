@@ -23,6 +23,18 @@ horrible things to get this to build. These are the steps on my Linux machine
 The `vulkan` package currently takes ages and ages to build without -O0, so you
 might want to specify that too.
 
+### Building on Ubuntu with Stack
+
+Note, you need modern drivers to support vulkan api,
+e.g. `nvidia-367` that is available at `ppa:graphics-drivers/ppa` currently.
+If your drivers are ok, install `libvulkan-dev` and run examples using `stack`:
+```bash
+sudo apt-get install libvulkan-dev
+# run this from a folder containing cloned vulkan-examples
+stack setup
+stack install
+```
+
 ## Contributing
 
 It would be awesome if you could try and get this to work on your system and
