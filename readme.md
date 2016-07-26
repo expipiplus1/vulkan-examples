@@ -23,6 +23,12 @@ horrible things to get this to build. These are the steps on my Linux machine
 The `vulkan` package currently takes ages and ages to build without -O0, so you
 might want to specify that too.
 
+### Building on ubuntu
+
+Just install `libvulkan-dev` ubuntu package, install appropriate drivers
+and enjoy `stack setup && stack install`!
+
+
 ## Contributing
 
 It would be awesome if you could try and get this to work on your system and
