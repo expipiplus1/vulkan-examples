@@ -1,5 +1,3 @@
-with (import <nixpkgs> {}).pkgs;
+{ pkgs ? import <nixpkgs> {} }:
 
-(pkgs.haskellPackages.callPackage ./. {
-    vulkan = pkgs.haskellPackages.callPackage /home/j/projects/vulkan/default.nix {};
-}).env
+(import ./default.nix { inherit pkgs; }).env
