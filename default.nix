@@ -1,7 +1,8 @@
 { pkgs ? import <nixpkgs> {}, compiler ? "ghc822" }:
 
+# Strip out the irrelevant parts of the source
 let src = with pkgs.lib;
-          let p = n: (toString ./dist) == n;
+          let p = n: toString ./dist == n;
           in cleanSourceWith {filter = (n: t: !p n); src = cleanSource ./.;};
 
     haskellPackages = pkgs.haskell.packages.${compiler}.override {

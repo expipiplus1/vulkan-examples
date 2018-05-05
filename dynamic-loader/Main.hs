@@ -11,6 +11,7 @@ import           Foreign.Marshal.Utils
 import           Foreign.Ptr
 import           Foreign.Storable
 import           Graphics.Vulkan
+import qualified Graphics.Vulkan.Dynamic as Vk
 
 main :: IO ()
 main = do
@@ -40,10 +41,10 @@ createInstance = withCString "vulkan-example" $ \namePtr ->
             }
           $ \instInfo -> alloca $ \instPtr -> do
               err <- vkCreateInstance instInfo nullPtr instPtr
-              print err
               inst <- peek instPtr
-              print =<< (withCString "vkCreateDevice" $ vkGetInstanceProcAddr inst)
-              print =<< (withCString "vkGetInstanceProcAddr" $ vkGetInstanceProcAddr inst)
-              peek instPtr
+              print err
+              instCmds <- Vk.initInstanceCmds inst
+              print instCmds
+              pure inst
 
 destroyInstance inst = vkDestroyInstance inst nullPtr
