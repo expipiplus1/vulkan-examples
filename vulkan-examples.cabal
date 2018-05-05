@@ -16,9 +16,18 @@ cabal-version:       >=1.10
 executable vulkan-example
   hs-source-dirs:      src
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:       base
                      , vulkan >= 2.0
+  default-language:    Haskell2010
+
+executable vulkan-example-marshalled
+  hs-source-dirs:      marshalled
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:       base
+                     , vulkan >= 3.0
+                     , say
   default-language:    Haskell2010
 
 source-repository head
