@@ -6,17 +6,17 @@ module Main where
 import           Data.Bits
 import           Foreign.C.String
 import           Foreign.Marshal.Alloc
-import           Foreign.Marshal.Array
 import           Foreign.Marshal.Utils
 import           Foreign.Ptr
 import           Foreign.Storable
-import           Graphics.Vulkan
+import           Graphics.Vulkan.C
 
 main :: IO ()
 main = do
   vulkanInstance <- createInstance
   destroyInstance vulkanInstance
 
+createInstance :: IO VkInstance
 createInstance = withCString "vulkan-example" $ \namePtr ->
   with VkApplicationInfo
       { vkSType              = VK_STRUCTURE_TYPE_APPLICATION_INFO
@@ -46,4 +46,5 @@ createInstance = withCString "vulkan-example" $ \namePtr ->
               print =<< (withCString "vkGetInstanceProcAddr" $ vkGetInstanceProcAddr inst)
               peek instPtr
 
+destroyInstance :: VkInstance -> IO ()
 destroyInstance inst = vkDestroyInstance inst nullPtr

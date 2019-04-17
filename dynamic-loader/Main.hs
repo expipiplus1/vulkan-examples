@@ -6,18 +6,19 @@ module Main where
 import           Data.Bits
 import           Foreign.C.String
 import           Foreign.Marshal.Alloc
-import           Foreign.Marshal.Array
 import           Foreign.Marshal.Utils
 import           Foreign.Ptr
 import           Foreign.Storable
-import           Graphics.Vulkan
-import qualified Graphics.Vulkan.Dynamic as Vk
+import           Graphics.Vulkan.C
+import qualified Graphics.Vulkan.C.Dynamic as Vk
 
 main :: IO ()
 main = do
   vulkanInstance <- createInstance
-  destroyInstance vulkanInstance
+  cmds <- Vk.initInstanceCmds vulkanInstance
+  destroyInstance cmds vulkanInstance
 
+createInstance :: IO VkInstance
 createInstance = withCString "vulkan-example" $ \namePtr ->
   with VkApplicationInfo
       { vkSType              = VK_STRUCTURE_TYPE_APPLICATION_INFO
@@ -26,7 +27,7 @@ createInstance = withCString "vulkan-example" $ \namePtr ->
       , vkApplicationVersion = 1
       , vkPEngineName        = namePtr
       , vkEngineVersion      = 0
-      , vkApiVersion         = VK_MAKE_VERSION 1 0 0
+      , vkApiVersion         = 0
       }
     $ \appInfo ->
         with VkInstanceCreateInfo
@@ -40,11 +41,12 @@ createInstance = withCString "vulkan-example" $ \namePtr ->
             , vkPPEnabledExtensionNames = nullPtr
             }
           $ \instInfo -> alloca $ \instPtr -> do
-              err <- vkCreateInstance instInfo nullPtr instPtr
+              err <- Vk.createInstance instInfo nullPtr instPtr
               inst <- peek instPtr
               print err
               instCmds <- Vk.initInstanceCmds inst
               print instCmds
               pure inst
 
-destroyInstance inst = vkDestroyInstance inst nullPtr
+destroyInstance :: Vk.InstanceCmds -> VkInstance -> IO ()
+destroyInstance cmds inst = Vk.destroyInstance cmds inst nullPtr
