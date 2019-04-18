@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds                #-}
+{-# LANGUAGE TypeApplications                #-}
 {-# LANGUAGE DuplicateRecordFields    #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE LambdaCase               #-}
@@ -98,6 +99,46 @@ windowInstanceCreateInfo window = do
     , vkPpEnabledLayerNames     = requiredLayers
     , vkPpEnabledExtensionNames = requiredExtensions
     }
+
+pickPhysicalDevice :: Instance -> IO PhysicalDevice
+pickPhysicalDevice inst = do
+  enumerateAllPhysicalDevices inst >>= \case
+    [] -> do
+      sayErr "No physical devices found"
+      exitFailure
+    ps -> do
+      let
+        deviceScore :: PhysicalDevice -> IO Int
+        deviceScore dev = do
+          properties <- getPhysicalDeviceProperties dev
+          -- features <- getPhysicalDeviceFeatures dev
+          heaps <- vkMemoryHeaps <$> getPhysicalDeviceMemoryProperties dev
+          let totalSize = sum $ (vkSize :: MemoryHeap -> DeviceSize) <$> heaps
+          queueFamilyProperties <-
+            getAllPhysicalDeviceQueueFamilyProperties dev
+          let
+              isGraphicsQueue q =
+                (C.VK_QUEUE_GRAPHICS_BIT .&&. vkQueueFlags q)
+                && (vkQueueCount q > 0)
+              graphicsQueueIndices = fst <$> V.filter (isGraphicsQueue . snd) (V.indexed queueFamilyProperties)
+          pure totalSize
+        getGraphicsQueueFamily :: PhysicalDevice -> IO (Maybe Word32)
+        getGraphicsQueueFamily d = do
+          _properties <- getPhysicalDeviceProperties d
+          qfps <- V.indexed <$>
+          let
+            graphicsQueueIndex = case V.filter (isGraphicsQueue . snd) qfps of
+              [] -> Nothing
+              xs -> Just (fst $ V.head xs)
+          pure (fromIntegral <$> graphicsQueueIndex)
+      withQueues <- catMaybes <$> traverse
+        (\x -> fmap (x, ) <$> getGraphicsQueueFamily x)
+        (V.toList devices)
+      case withQueues of
+        [] -> do
+          sayErr "No suitable Vulkan device found"
+          exitFailure
+        x : _ -> pure x
 
 {-
 main :: IO ()
@@ -206,7 +247,7 @@ pickBestDevice devices = do
   withQueues <- catMaybes <$> traverse
     (\x -> fmap (x, ) <$> getGraphicsQueueFamily x)
     (V.toList devices)
-  case withQueues of
+  cahe withQueues of
     [] -> do
       sayErr "No suitable Vulkan device found"
       exitFailure
@@ -378,3 +419,11 @@ getSDLWindowSurface inst window =
   wordPtrToPtr . fromIntegral <$> SDL.vkCreateSurface
     window
     (coerce (instanceHandle inst))
+
+----------------------------------------------------------------
+-- Bit utils
+----------------------------------------------------------------
+
+(.&&.) :: Bits a => a -> a -> Bool
+x .&&. y = (/= zeroBits) (x .&. y)
+
