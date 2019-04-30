@@ -37,10 +37,12 @@ executable triangle
   build-depends:       base
                      , bytestring
                      , extra
+                     , managed
                      , pretty-show
                      , say
                      , sdl2
                      , text
+                     , transformers
                      , vector
                      , vulkan >= 3.0
   default-language:    Haskell2010

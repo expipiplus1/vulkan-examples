@@ -5,14 +5,23 @@
 
 let src = pkgs.nix-gitignore.gitignoreSource [] ./.;
 
+    haddockSrc = pkgs.fetchFromGitHub {
+      owner = "haskell";
+      repo = "haddock";
+      rev = "8964666efc4d4ab9756a83d16a02115a38744408";
+      sha256 = "1xrd2qs6x6ww9i70hzwbblb1hc2ms1mmp6i9v1qy5cymrrgzng89";
+    };
+
     # Any overrides we require to the specified haskell package set
     haskellPackages = with pkgs.haskell.lib;
       pkgs.haskell.packages.${compiler}.override {
       overrides = self: super: {
-        vulkan = disableLibraryProfiling (
+        vulkan =
+          #addBuildDepend (
+          disableLibraryProfiling (
           haskellPackages.callCabal2nix "" (pkgs.nix-gitignore.gitignoreSource ["generate"] ../vulkan) {
             vulkan = pkgs.vulkan-loader;
-          });
+          }); #) self.haddock;
         # sdl2 with vulkan functions exposed
         sdl2 =
           let sdl2-src = pkgs.fetchFromGitHub{
@@ -22,8 +31,26 @@ let src = pkgs.nix-gitignore.gitignoreSource [] ./.;
                 sha256 = "0c2pqrbyxmz2z9r9skxhrgalj71w96mqr9d1dzq39qdnl6g27f89";
               };
           in dontCheck (self.callCabal2nix "sdl2" sdl2-src {});
+        # haddock = overrideSrc super.haddock {
+        #   src = haddockSrc;
+        #   version = "head";
+        # };
+        # haddock-api = overrideSrc super.haddock-api {
+        #   src = haddockSrc + "/haddock-api";
+        #   version = "head";
+        # };
+        # haddock-library = overrideSrc super.haddock-library {
+        #   src = haddockSrc + "/haddock-library";
+        #   version = "head";
+        # };
       } // pkgs.lib.optionalAttrs hoogle {
-        ghc = super.ghc // { withPackages = super.ghc.withHoogle; };
+        hoogle = appendPatch super.hoogle
+          (pkgs.fetchpatch {
+            name = "fix-pattern-synonyms";
+            url = "https://patch-diff.githubusercontent.com/raw/ndmitchell/hoogle/pull/295.patch";
+            sha256 = "0xhcg1p8fhvn1w9hzjhj611zw2v8ydashxxwvpdqiv2p5f6k9dlw";
+          });
+        ghc = super.ghc // { withPackages = self.ghc.withHoogle; };
         ghcWithPackages = self.ghc.withPackages;
       };
     };
@@ -31,6 +58,7 @@ let src = pkgs.nix-gitignore.gitignoreSource [] ./.;
     # Any packages to appear in the environment provisioned by nix-shell
     extraEnvPackages = with haskellPackages; [
       pkgs.vulkan-headers
+      pkgs.glslang
     ];
 
     # Generate a haskell derivation using the cabal2nix tool on `package.yaml`
