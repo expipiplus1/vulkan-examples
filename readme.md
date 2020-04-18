@@ -1,3 +1,6 @@
+# *These examples have moved to the [vulkan repo](https://github.com/expipiplus1/vulkan)*
+
+
 # vulkan-examples
 
 Some examples for using the
